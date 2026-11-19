@@ -57599,11 +57599,18 @@ function getDefaultConfig() {
     accounts: []
   };
 }
+function cleanEnvVal(val) {
+  const trimmed = val?.trim();
+  if (!trimmed || trimmed.startsWith("${user_config.")) {
+    return void 0;
+  }
+  return trimmed;
+}
 function accountsFromEnv() {
   const accounts = [];
-  const mashovUser = process.env.MASHOV_USERNAME?.trim();
-  const mashovPass = process.env.MASHOV_PASSWORD?.trim();
-  const mashovSemelRaw = process.env.MASHOV_SEMEL?.trim();
+  const mashovUser = cleanEnvVal(process.env.MASHOV_USERNAME);
+  const mashovPass = cleanEnvVal(process.env.MASHOV_PASSWORD);
+  const mashovSemelRaw = cleanEnvVal(process.env.MASHOV_SEMEL);
   if (mashovUser && mashovPass && mashovSemelRaw) {
     const semel = Number(mashovSemelRaw);
     if (Number.isFinite(semel) && semel > 0) {
@@ -57616,8 +57623,8 @@ function accountsFromEnv() {
       });
     }
   }
-  const webtopUser = process.env.WEBTOP_USERNAME?.trim();
-  const webtopPass = process.env.WEBTOP_PASSWORD?.trim();
+  const webtopUser = cleanEnvVal(process.env.WEBTOP_USERNAME);
+  const webtopPass = cleanEnvVal(process.env.WEBTOP_PASSWORD);
   if (webtopUser && webtopPass) {
     accounts.push({
       id: `webtop-${webtopUser}`,

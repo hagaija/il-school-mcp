@@ -1,14 +1,18 @@
 {
-  "manifest_version": "0.3",
+  "manifest_version": "0.4",
   "name": "il-school-mcp",
   "display_name": "Israeli School (Mashov & Webtop)",
-  "version": "0.2.0",
-  "description": "Local read-only MCP extension for Israeli school portals (Mashov & Webtop)",
+  "version": "0.2.1",
+  "description": "Local read-only assistant for Israeli school portals (Mashov & Webtop)",
   "author": {
     "name": "Hagai Jacobson",
     "url": "https://github.com/hagaija/il-school-mcp"
   },
-  "icon": "assets/logo.svg",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hagaija/il-school-mcp.git"
+  },
+  "icon": "assets/icon.png",
   "server": {
     "type": "node",
     "entry_point": "bundle/server.cjs",
@@ -24,33 +28,73 @@
       }
     }
   },
+  "tools": [
+    {
+      "name": "school_list_students",
+      "description": "List auto-discovered children, classes, and portals"
+    },
+    {
+      "name": "school_get_schedule",
+      "description": "Get daily or weekly lesson timetables"
+    },
+    {
+      "name": "school_get_homework",
+      "description": "Get homework assignments and due dates"
+    },
+    {
+      "name": "school_get_behavior",
+      "description": "Get positive, negative, and attendance behavior logs"
+    },
+    {
+      "name": "school_get_exams",
+      "description": "Get upcoming exams and linked study materials"
+    },
+    {
+      "name": "school_get_messages",
+      "description": "Get school inbox messages and PDF/DOCX attachment text"
+    },
+    {
+      "name": "school_get_digest",
+      "description": "Get consolidated daily/tomorrow school digest"
+    },
+    {
+      "name": "school_open_setup",
+      "description": "Open local 127.0.0.1 browser setup page for adding or editing accounts"
+    }
+  ],
   "user_config": {
     "mashov_username": {
       "type": "string",
       "title": "Mashov Username / ID (optional)",
+      "description": "Your Mashov parent or student username/ID. Leave blank if you only use Webtop or prefer browser setup.",
       "required": false
     },
     "mashov_password": {
       "type": "string",
       "title": "Mashov Password (optional)",
+      "description": "Your Mashov account password (stored securely in your OS keychain).",
       "sensitive": true,
       "required": false
     },
     "mashov_semel": {
       "type": "string",
       "title": "Mashov School Code / סמל מוסד (optional)",
+      "description": "Your school's 6-digit Ministry of Education code (semel).",
       "required": false
     },
     "webtop_username": {
       "type": "string",
       "title": "Webtop Username (optional)",
+      "description": "Your Webtop (SmartSchool) username. Leave blank if you only use Mashov.",
       "required": false
     },
     "webtop_password": {
       "type": "string",
       "title": "Webtop Password (optional)",
+      "description": "Your Webtop account password (stored securely in your OS keychain).",
       "sensitive": true,
       "required": false
     }
-  }
+  },
+  "license": "MIT"
 }
