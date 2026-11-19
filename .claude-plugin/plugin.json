@@ -1,0 +1,6 @@
+{
+  "name": "il-school",
+  "version": "0.1.0",
+  "description": "Read-only Israeli school portal assistant for Mashov (משו״ב) and Webtop (SmartSchool)",
+  "keywords": ["mashov", "webtop", "school", "israel", "parents", "mcp"]
+}

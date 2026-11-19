@@ -1,0 +1,20 @@
+{
+  "name": "il-school-marketplace",
+  "interface": {
+    "displayName": "Israeli School (Mashov & Webtop)"
+  },
+  "plugins": [
+    {
+      "name": "il-school",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "manifest_version": "0.2",
+  "name": "il-school-mcp",
+  "version": "0.1.0",
+  "description": "Local read-only MCP server for Israeli school portals (Mashov & Webtop)",
+  "author": {
+    "name": "il-school-mcp contributors"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "MASHOV_USERNAME": "${user_config.mashov_username}",
+        "MASHOV_PASSWORD": "${user_config.mashov_password}",
+        "MASHOV_SEMEL": "${user_config.mashov_semel}",
+        "WEBTOP_USERNAME": "${user_config.webtop_username}",
+        "WEBTOP_PASSWORD": "${user_config.webtop_password}"
+      }
+    }
+  },
+  "user_config": {
+    "mashov_username": {
+      "type": "string",
+      "title": "Mashov Username / ID (optional)",
+      "required": false
+    },
+    "mashov_password": {
+      "type": "string",
+      "title": "Mashov Password (optional)",
+      "sensitive": true,
+      "required": false
+    },
+    "mashov_semel": {
+      "type": "string",
+      "title": "Mashov School Code / סמל מוסד (optional)",
+      "required": false
+    },
+    "webtop_username": {
+      "type": "string",
+      "title": "Webtop Username (optional)",
+      "required": false
+    },
+    "webtop_password": {
+      "type": "string",
+      "title": "Webtop Password (optional)",
+      "sensitive": true,
+      "required": false
+    }
+  }
+}

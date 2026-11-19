@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "il-school",
+  "version": "0.1.0",
+  "description": "Read-only Israeli school portal assistant for Mashov (משו״ב) and Webtop (SmartSchool)",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Israeli School (Mashov & Webtop)",
+        "shortDescription": "Mashov & Webtop parent assistant",
+        "longDescription": "Read-only assistant for Israeli school portals (Mashov & Webtop). Query lesson timetables, homework with inferred due dates, upcoming exams with linked study material, behavior logs, and inbox messages.",
+        "category": "Productivity",
+        "capabilities": ["Interactive"],
+        "defaultPrompt": "Show today's school digest, homework, and upcoming exams for all kids."
+      }
+    }
+  }
+}

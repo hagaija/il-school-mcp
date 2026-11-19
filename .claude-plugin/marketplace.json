@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "il-school-marketplace",
+  "description": "Israeli school portal (Mashov & Webtop) MCP plugin for parents",
+  "owner": {
+    "name": "il-school-mcp contributors"
+  },
+  "plugins": [
+    {
+      "name": "il-school",
+      "description": "Read-only Mashov and Webtop assistant for lesson schedules, homework, exams, behavior logs, and school messages",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
+}
