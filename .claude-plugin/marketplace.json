@@ -9,7 +9,7 @@
     {
       "name": "il-school",
       "description": "Read-only Mashov and Webtop assistant for lesson schedules, homework, exams, behavior logs, and school messages",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./"
     }
   ]

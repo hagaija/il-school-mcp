@@ -75,7 +75,7 @@ function createTestManager(tmpDir: string): SchoolManager {
   });
 }
 
-test("MCP server exposes all 7 tools and executes them end-to-end via InMemoryTransport", async () => {
+test("MCP server exposes all 8 tools and executes them end-to-end via InMemoryTransport", async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "il-school-mcp-"));
   const manager = createTestManager(tmpDir);
   const server = createSchoolMcpServer(manager);
@@ -96,6 +96,7 @@ test("MCP server exposes all 7 tools and executes them end-to-end via InMemoryTr
     "school_get_messages",
     "school_get_schedule",
     "school_list_students",
+    "school_open_setup",
   ]);
 
   const studentsRes = await client.callTool({ name: "school_list_students", arguments: {} });
@@ -147,7 +148,23 @@ test("MCP server reports needsSetup=true when no accounts are configured", async
   const studentsJson = JSON.parse((studentsRes.content as Array<{ text: string }>)[0].text);
   assert.equal(studentsJson.needsSetup, true);
   assert.equal(studentsJson.count, 0);
+  assert.ok(String(studentsJson.setupUrl).startsWith("http://127.0.0.1:"));
   assert.ok(String(studentsJson.setupCommand).includes("setup"));
+
+  const openRes = await client.callTool({
+    name: "school_open_setup",
+    arguments: { open_browser: false },
+  });
+  const openJson = JSON.parse((openRes.content as Array<{ text: string }>)[0].text);
+  assert.equal(openJson.setupUrl, studentsJson.setupUrl);
+
+  // Verify the local setup web UI serves HTML with valid token and rejects missing token
+  const unauthSetup = await fetch(String(openJson.setupUrl).split("?")[0]);
+  assert.equal(unauthSetup.status, 403);
+  const setupHtmlRes = await fetch(openJson.setupUrl);
+  assert.equal(setupHtmlRes.status, 200);
+  const html = await setupHtmlRes.text();
+  assert.ok(html.includes("il-school-mcp Setup"));
 
   await client.close();
   await server.close();

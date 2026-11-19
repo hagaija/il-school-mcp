@@ -7,22 +7,26 @@ This repository implements an Israeli school portal MCP server (**Mashov / מש�
 ### 1. Default `stdio` mode (Claude Desktop, Antigravity, Cursor, Claude Code, Codex)
 ```bash
 node scripts/launch-mcp.mjs
-# or directly after build:
-node dist/index.js
+# or directly using the pre-built zero-dependency bundle:
+node bundle/server.cjs
 ```
 - Uses `stdin`/`stdout` exclusively for JSON-RPC MCP messages.
-- `scripts/launch-mcp.mjs` automatically runs `npm install` and `npm run build` (sending build logs to `stderr`) if `node_modules/` or `dist/` are missing after a fresh clone.
+- `scripts/launch-mcp.mjs` prefers the committed self-contained `bundle/server.cjs` (boots in <50ms with zero `npm install`), falling back to `npm install` + `npm run build` (`stderr` logs only) if the bundle is missing.
 
 ### 2. Streamable HTTP mode (ChatGPT Desktop standard chat via local tunnel)
 ```bash
-node dist/index.js --http --host 127.0.0.1 --port 3333 --token "<secret-token>"
+node bundle/server.cjs --http --host 127.0.0.1 --port 3333 --token "<secret-token>"
 ```
 - Endpoint: `http://127.0.0.1:3333/mcp` (`GET /health` returns `{ "ok": true, "server": "il-school-mcp" }`).
 - If `--token` (or `IL_SCHOOL_HTTP_TOKEN`) is set, all `/mcp` requests require `Authorization: Bearer <token>`.
 
 ## Setup & Reconfiguration
 
-* **First-time setup or modifying existing config:**
+* **Zero-terminal local browser setup UI (automatically offered via `school_open_setup` when `needsSetup: true`):**
+  ```bash
+  node scripts/launch-mcp.mjs setup --web
+  ```
+* **Interactive terminal setup wizard (add, edit, student overrides, remove, general settings):**
   ```bash
   node scripts/launch-mcp.mjs setup
   # or: npm run setup

@@ -1,17 +1,20 @@
 {
-  "manifest_version": "0.2",
+  "manifest_version": "0.3",
   "name": "il-school-mcp",
-  "version": "0.1.0",
-  "description": "Local read-only MCP server for Israeli school portals (Mashov & Webtop)",
+  "display_name": "Israeli School (Mashov & Webtop)",
+  "version": "0.2.0",
+  "description": "Local read-only MCP extension for Israeli school portals (Mashov & Webtop)",
   "author": {
-    "name": "il-school-mcp contributors"
+    "name": "Hagai Jacobson",
+    "url": "https://github.com/hagaija/il-school-mcp"
   },
+  "icon": "assets/logo.svg",
   "server": {
     "type": "node",
-    "entry_point": "dist/index.js",
+    "entry_point": "bundle/server.cjs",
     "mcp_config": {
       "command": "node",
-      "args": ["${__dirname}/dist/index.js"],
+      "args": ["${__dirname}/bundle/server.cjs"],
       "env": {
         "MASHOV_USERNAME": "${user_config.mashov_username}",
         "MASHOV_PASSWORD": "${user_config.mashov_password}",

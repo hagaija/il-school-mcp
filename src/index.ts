@@ -2,6 +2,7 @@
 import { runDoctor, runSetupWizard } from "./cli/setup.js";
 import { SchoolManager } from "./manager.js";
 import { runHttpServer, runStdioServer } from "./server.js";
+import { ensureLocalSetupServer, openUrlInBrowser } from "./web-setup.js";
 
 function parseArg(args: string[], flag: string): string | undefined {
   const idx = args.indexOf(flag);
@@ -16,6 +17,13 @@ async function main(): Promise<void> {
   const cmd = args[0];
 
   if (cmd === "setup") {
+    if (args.includes("--web")) {
+      const manager = new SchoolManager();
+      const handle = await ensureLocalSetupServer(manager);
+      console.log(`Setup UI listening at: ${handle.url}`);
+      openUrlInBrowser(handle.url);
+      await new Promise(() => {});
+    }
     await runSetupWizard();
     return;
   }

@@ -9,20 +9,20 @@ description: >-
 # Israeli School Setup & Reconfiguration
 
 ## Security Rule (Non-Negotiable)
-**Never ask the user to type Mashov or Webtop passwords into chat.** Credentials must only be entered locally in the interactive terminal setup wizard so they stay on the user's machine (`~/.config/il-school-mcp/config.json`, mode `0600`) and never enter LLM conversation logs.
+**Never ask the user to type Mashov or Webtop passwords into chat.** Credentials must only be entered locally on the user's own computer so they stay in `~/.config/il-school-mcp/config.json` (mode `0600`) and never enter LLM conversation logs.
 
 ## When to Trigger
-- `school_list_students` returns `needsSetup: true` or reports no configured accounts.
-- The user says things like: "connect my Mashov/Webtop account", "add another child/school", "change my school password", "add an exam calendar URL", or "configure quiet hours".
+- Any `school_*` tool returns `needsSetup: true` or `setupUrl`.
+- The user asks to connect Mashov/Webtop, add a child/school, update a password, or change settings.
 
 ## Guided Onboarding / Modification Steps
-1. Explain that setup runs locally in their terminal so their school passwords stay private on their computer.
-2. Provide the exact command to run (prefer the repo launcher if cloned/installed as a plugin, or `npx il-school-mcp setup`):
+1. Call `school_open_setup` (or use the `setupUrl` returned by `school_list_students` / `school_get_digest`).
+2. Share the clickable localhost URL (`http://127.0.0.1:<port>/setup?token=...`) with the user. Explain that it opens a local setup page on their own computer where they can:
+   - Search for their Mashov school by name (to find the 6-digit `semel`) or enter a `semel` directly,
+   - Add/update Mashov and/or Webtop credentials and test login immediately,
+   - Remove accounts or update general settings (timezone, cache, quiet hours, attachment downloads).
+3. If the user prefers a terminal instead of a browser, they can also run:
    ```bash
    node <PLUGIN_ROOT>/scripts/launch-mcp.mjs setup
    ```
-   *(If they are already in the repository folder, `npm run setup` works too.)*
-3. Summarize what the interactive `setup` wizard lets them do:
-   - **First run:** Choose `mashov` (with built-in school-name search to find the 6-digit `semel`) or `webtop`, enter credentials, test login live, and verify auto-discovered children.
-   - **Re-running `setup`:** Opens a menu to **Add account**, **Edit existing account** (password, `semel`, label), **Manage student overrides** (nicknames/aliases, Google Exam Calendar `.ics` URL, grade, class number, tracks), **Remove account**, or **Edit general settings** (timezone, cache TTL, quiet hours 22:00–06:00).
-4. Once the user confirms they finished `setup`, call `school_list_students` with `refresh: true` to confirm all children are discovered and ready.
+4. Once the user confirms they saved their accounts, call `school_list_students` with `refresh: true` to confirm all children are discovered and answer their original question.

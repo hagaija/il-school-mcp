@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -8,15 +9,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
 
+const bundleEntry = path.join(rootDir, "bundle", "server.cjs");
 const distEntry = path.join(rootDir, "dist", "index.js");
 const nodeModulesDir = path.join(rootDir, "node_modules");
 
-function ensureBuilt() {
+// Fast-path: run the pre-built self-contained bundle with zero npm install / cold-start delay
+if (fs.existsSync(bundleEntry)) {
+  const require = createRequire(import.meta.url);
+  require(bundleEntry);
+} else {
   const needsInstall = !fs.existsSync(nodeModulesDir);
   const needsBuild = !fs.existsSync(distEntry);
-  if (!needsInstall && !needsBuild) {
-    return;
-  }
 
   const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
   if (needsInstall) {
@@ -40,7 +43,6 @@ function ensureBuilt() {
       process.exit(buildRes.status ?? 1);
     }
   }
-}
 
-ensureBuilt();
-await import(pathToFileURL(distEntry).href);
+  await import(pathToFileURL(distEntry).href);
+}

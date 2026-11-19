@@ -1,6 +1,6 @@
 {
   "name": "il-school-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local-first MCP server and desktop plugin for Israeli school portals (Mashov & Webtop)",
   "license": "MIT",
   "repository": {
@@ -16,6 +16,7 @@
     "il-school-mcp": "./dist/index.js"
   },
   "files": [
+    "bundle",
     "dist",
     "scripts",
     "skills",
@@ -35,7 +36,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run build:bundle",
+    "build:bundle": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=bundle/server.cjs",
+    "pack:mcpb": "npm run build && rm -f il-school-mcp.mcpb && zip -r il-school-mcp.mcpb manifest.json bundle/server.cjs assets/logo.svg README.md LICENSE",
     "dev": "tsx src/index.ts",
     "setup": "tsx src/index.ts setup",
     "test": "node --import tsx --test tests/*.test.ts"

@@ -1,7 +1,7 @@
 {
   "name": "il-school",
   "displayName": "Israeli School (Mashov & Webtop)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Connect to Mashov and Webtop to check your kids' schedules, homework, upcoming exams, study materials, behavior logs, and school messages.",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [

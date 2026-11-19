@@ -10,7 +10,14 @@ import type {
   SchoolMessage,
 } from "./types.js";
 
-const require = createRequire(import.meta.url);
+// Lazy require compatible with both ESM (tsc) and CJS (esbuild bundle)
+function loadPdfParse(): (dataBuffer: Buffer) => Promise<{ text?: string }> {
+  const req =
+    typeof require === "function" ? require : createRequire(import.meta.url);
+  return req("pdf-parse/lib/pdf-parse.js") as (
+    dataBuffer: Buffer
+  ) => Promise<{ text?: string }>;
+}
 
 export const HEBREW_DAY_NAMES: Record<number, string> = {
   1: "ראשון",
@@ -452,9 +459,7 @@ export async function extractAttachmentText(
       if (!buf.subarray(0, 8).toString("latin1").startsWith("%PDF")) {
         return { isImage: false };
       }
-      const pdfParse = require("pdf-parse/lib/pdf-parse.js") as (
-        dataBuffer: Buffer
-      ) => Promise<{ text?: string }>;
+      const pdfParse = loadPdfParse();
       // pdf-parse's bundled pdf.js logs font warnings via console.log (stdout),
       // which would corrupt MCP stdio JSON-RPC streams if left unguarded.
       const origLog = console.log;

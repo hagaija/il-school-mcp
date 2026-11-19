@@ -16,19 +16,22 @@ Local-first, read-only **agentic plugin & MCP server** for Israeli school portal
 
 ## Installing as a Plugin
 
-### 1. Claude (Claude Code / Claude Marketplace / Claude Desktop)
-* **Claude Code (GitHub marketplace):**
+### 1. Claude (Claude Desktop App, Cowork & Claude Code)
+* **Claude Desktop Chat (1-Click Desktop Extension `.mcpb` — Recommended for non-developers):**
+  Regular Claude Desktop Chat does **not** run `.mcp.json` `stdio` servers from GitHub marketplace plugins (it only syncs their `SKILL.md`s). Instead, download `il-school-mcp.mcpb` from [GitHub Releases](https://github.com/hagaija/il-school-mcp/releases) and open/drop it in **Claude Desktop → Settings → Extensions**. Claude Desktop will prompt you for Mashov/Webtop credentials directly in a native GUI form on install.
+* **Claude Code / Cowork (GitHub marketplace):**
   ```text
   /plugin marketplace add hagaija/il-school-mcp
   /plugin install il-school@il-school-marketplace
   ```
+  *(On first question, Claude will provide a `http://127.0.0.1:...` setup link via `school_open_setup` if no accounts are configured yet.)*
 * **Manual MCP entry (`claude_desktop_config.json`):**
   ```json
   {
     "mcpServers": {
       "il-school": {
         "command": "node",
-        "args": ["/ABS/PATH/TO/il-school-mcp/scripts/launch-mcp.mjs"]
+        "args": ["/ABS/PATH/TO/il-school-mcp/bundle/server.cjs"]
       }
     }
   }
@@ -93,6 +96,7 @@ node scripts/launch-mcp.mjs doctor
 5. `school_get_exams` — Upcoming exams + linked study materials (`provided` vs. `missing`).
 6. `school_get_messages` — School inbox messages + extracted PDF/DOCX attachment text.
 7. `school_get_digest` — Consolidated daily/tomorrow family briefing.
+8. `school_open_setup` — Opens a local `127.0.0.1` browser setup page so GUI users can configure or edit Mashov/Webtop accounts without using a terminal or sharing passwords in chat.
 
 ---
 

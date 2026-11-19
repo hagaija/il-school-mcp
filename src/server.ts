@@ -6,6 +6,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { getZonedDateParts, HEBREW_DAY_NAMES, resolveDayQuery } from "./intelligence.js";
 import { SchoolManager } from "./manager.js";
+import { ensureLocalSetupServer, openUrlInBrowser } from "./web-setup.js";
 
 const READ_ONLY_ANNOTATIONS = {
   readOnlyHint: true,
@@ -20,6 +21,21 @@ function jsonResult(data: unknown) {
   };
 }
 
+async function maybeAttachSetupPayload(
+  manager: SchoolManager,
+  needsSetup: boolean | undefined
+): Promise<Record<string, unknown>> {
+  if (!needsSetup) return {};
+  const handle = await ensureLocalSetupServer(manager);
+  return {
+    needsSetup: true,
+    setupUrl: handle.url,
+    setupCommand: "node scripts/launch-mcp.mjs setup",
+    setupNote:
+      "No accounts configured yet. Share the setupUrl link with the user so they can enter Mashov/Webtop credentials locally in their browser (never ask for passwords in chat), then call school_list_students with refresh=true.",
+  };
+}
+
 export function createSchoolMcpServer(manager: SchoolManager): McpServer {
   const server = new McpServer(
     {
@@ -30,9 +46,36 @@ export function createSchoolMcpServer(manager: SchoolManager): McpServer {
       instructions:
         "Read-only assistant for Israeli school portals (Mashov & Webtop). " +
         "Call school_list_students first if you need to discover the family's children, classes, or systems. " +
+        "If needsSetup is true (or the user asks to configure/modify accounts), call school_open_setup and share the localhost setupUrl link (never ask for passwords in chat). " +
         "When homework has dueDateInferred=true, explicitly note that the due date is estimated from inferredFromLesson. " +
         "When exams have studyMaterialStatus='missing', explicitly highlight that no study material was provided yet. " +
         "For behavior events, clearly distinguish positive ('positive'), negative ('negative'), and attendance events.",
+    }
+  );
+
+  server.registerTool(
+    "school_open_setup",
+    {
+      title: "Open Local School Setup Page",
+      description:
+        "Start (or reuse) a local-only 127.0.0.1 browser setup page so the user can add, test, or modify Mashov/Webtop accounts safely without typing passwords into chat.",
+      inputSchema: {
+        open_browser: z
+          .boolean()
+          .optional()
+          .describe("Whether to attempt opening the default browser automatically (default true)."),
+      },
+      annotations: READ_ONLY_ANNOTATIONS,
+    },
+    async ({ open_browser }) => {
+      const handle = await ensureLocalSetupServer(manager);
+      if (open_browser !== false) {
+        openUrlInBrowser(handle.url);
+      }
+      return jsonResult({
+        setupUrl: handle.url,
+        note: "Open this local 127.0.0.1 URL in your browser to add/test/update Mashov or Webtop accounts. Credentials stay on your computer and never enter chat.",
+      });
     }
   );
 
@@ -49,16 +92,11 @@ export function createSchoolMcpServer(manager: SchoolManager): McpServer {
     },
     async ({ refresh }) => {
       const state = await manager.getFullState(Boolean(refresh));
+      const setupPayload = await maybeAttachSetupPayload(manager, state.needsSetup);
       return jsonResult({
         updatedAt: state.updatedAt,
         needsSetup: Boolean(state.needsSetup),
-        ...(state.needsSetup
-          ? {
-              setupCommand: "node scripts/launch-mcp.mjs setup",
-              setupNote:
-                "No accounts configured yet. Ask the user to run the setup command in their local terminal (never ask for passwords in chat), then call school_list_students with refresh=true.",
-            }
-          : {}),
+        ...setupPayload,
         count: state.students.length,
         students: state.students.map((s) => ({
           displayName: s.displayName,
@@ -93,6 +131,9 @@ export function createSchoolMcpServer(manager: SchoolManager): McpServer {
     },
     async ({ kid, date_or_day }) => {
       const state = await manager.getFullState();
+      if (state.needsSetup) {
+        return jsonResult(await maybeAttachSetupPayload(manager, true));
+      }
       const targetKid = manager.resolveStudentName(kid, state.students);
       const resolved = resolveDayQuery(date_or_day, state.timezone);
       const kids = targetKid ? [targetKid] : state.students.map((s) => s.displayName);
@@ -307,6 +348,9 @@ export function createSchoolMcpServer(manager: SchoolManager): McpServer {
     },
     async ({ refresh }) => {
       const state = await manager.getFullState(Boolean(refresh));
+      if (state.needsSetup) {
+        return jsonResult(await maybeAttachSetupPayload(manager, true));
+      }
       const now = new Date();
       const todayParts = getZonedDateParts(now, state.timezone);
       const tomorrowParts = getZonedDateParts(

@@ -18,7 +18,8 @@ import type {
 } from "./types.js";
 
 export class SchoolManager {
-  private readonly config: AppConfig;
+  private config: AppConfig;
+  private readonly customConfigProvided: boolean;
   private readonly sessionStore: SchoolSessionStore;
   private readonly attachmentsDir: string;
   private readonly fetchImpl?: FetchLike;
@@ -31,6 +32,7 @@ export class SchoolManager {
     attachmentsDir?: string;
     fetchImpl?: FetchLike;
   }) {
+    this.customConfigProvided = Boolean(opts?.config);
     this.config = opts?.config ?? loadConfig();
     const cacheDir = getCacheDir();
     this.sessionStore =
@@ -40,6 +42,15 @@ export class SchoolManager {
   }
 
   getAppConfig(): AppConfig {
+    return this.config;
+  }
+
+  reloadConfig(): AppConfig {
+    if (!this.customConfigProvided) {
+      this.config = loadConfig();
+    }
+    this.cachedState = undefined;
+    this.lastFetchMs = 0;
     return this.config;
   }
 
