@@ -166,3 +166,74 @@ test("WebtopClient logs in, detects status:false expiration, re-auths once, and 
   assert.equal(res.timetables["ירדן"][4][0].subject, "אנגלית");
   assert.equal(res.messages[0].sender, "שירה כהן");
 });
+
+test("WebtopClient unwraps data.dataTable.diciplineEvents behavior response", async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "il-school-webtop-beh-"));
+  const store = new SchoolSessionStore(path.join(tmpDir, "sessions.json"));
+
+  const mockFetch: typeof fetch = async (input) => {
+    const url = String(input);
+    if (url.endsWith("/api/user/LoginByUserNameAndPassword")) {
+      return new Response(
+        JSON.stringify({ status: true, data: { token: "wt-tok-1" } }),
+        { status: 200 }
+      );
+    }
+    if (url.endsWith("/api/dashboard/InitDashboard")) {
+      return new Response(
+        JSON.stringify({
+          status: true,
+          data: {
+            childrens: [{ id: "enc-1", firstName: "ירדן", lastName: "יעקובסון", classCode: 3, classNum: 1 }],
+          },
+        }),
+        { status: 200 }
+      );
+    }
+    if (url.endsWith("/api/dashboard/GetHomeWork")) {
+      return new Response(JSON.stringify({ status: true, data: { dataTable: [] } }), { status: 200 });
+    }
+    if (url.endsWith("/api/dashboard/GetPupilDiciplineEvents")) {
+      return new Response(
+        JSON.stringify({
+          status: true,
+          data: {
+            dataTable: {
+              diciplineEvents: [
+                {
+                  eventID: 30540817,
+                  eventType: "מילה טובה- התארגנות ומילוי משימות",
+                  subjectName: "מתמטיקה",
+                  teacherName: "מתתיה עדן אילנה",
+                  eventDate: "2026-11-20T00:00:00",
+                },
+              ],
+            },
+          },
+        }),
+        { status: 200 }
+      );
+    }
+    if (url.endsWith("/api/PupilCard/GetPupilScheduale")) {
+      return new Response(JSON.stringify({ status: true, data: [] }), { status: 200 });
+    }
+    if (url.endsWith("/api/messageBox/GetMessagesInbox")) {
+      return new Response(JSON.stringify({ status: true, data: [] }), { status: 200 });
+    }
+    return new Response("Not found", { status: 404 });
+  };
+
+  const client = new WebtopClient({
+    account: { id: "wt2", system: "webtop", username: "parent2", password: "pw" },
+    sessionStore: store,
+    attachmentsDir: path.join(tmpDir, "att"),
+    downloadAttachments: false,
+    fetchImpl: mockFetch,
+  });
+
+  const res = await client.fetchAll(new Date("2026-11-21T12:00:00Z"));
+  assert.equal(res.behaviorEvents.length, 1);
+  assert.equal(res.behaviorEvents[0].category, "positive");
+  assert.equal(res.behaviorEvents[0].title, "מילה טובה- התארגנות ומילוי משימות");
+  assert.equal(res.behaviorEvents[0].subject, "מתמטיקה");
+});

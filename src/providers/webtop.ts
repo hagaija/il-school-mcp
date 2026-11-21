@@ -118,6 +118,36 @@ export function normalizeWebtopHomework(
   return items;
 }
 
+function extractWebtopDisciplineEvents(rawData: unknown): Array<Record<string, unknown>> {
+  if (Array.isArray(rawData)) {
+    return rawData as Array<Record<string, unknown>>;
+  }
+  if (!rawData || typeof rawData !== "object") {
+    return [];
+  }
+  const obj = rawData as Record<string, unknown>;
+  const dt = obj.dataTable;
+  if (Array.isArray(dt)) {
+    return dt as Array<Record<string, unknown>>;
+  }
+  if (dt && typeof dt === "object") {
+    const dtObj = dt as Record<string, unknown>;
+    if (Array.isArray(dtObj.diciplineEvents)) {
+      return dtObj.diciplineEvents as Array<Record<string, unknown>>;
+    }
+    if (Array.isArray(dtObj.disciplineEvents)) {
+      return dtObj.disciplineEvents as Array<Record<string, unknown>>;
+    }
+  }
+  if (Array.isArray(obj.diciplineEvents)) {
+    return obj.diciplineEvents as Array<Record<string, unknown>>;
+  }
+  if (Array.isArray(obj.disciplineEvents)) {
+    return obj.disciplineEvents as Array<Record<string, unknown>>;
+  }
+  return [];
+}
+
 export function normalizeWebtopBehave(
   student: DiscoveredStudent,
   rawEvents: Array<Record<string, unknown>> | null | undefined
@@ -491,10 +521,9 @@ export class WebtopClient {
         now
       );
       session = behRes.session;
-      if (behRes.json && behRes.json.status !== false && Array.isArray(behRes.json.data)) {
-        behaviorEvents.push(
-          ...normalizeWebtopBehave(student, behRes.json.data as Array<Record<string, unknown>>)
-        );
+      if (behRes.json && behRes.json.status !== false) {
+        const rawEvents = extractWebtopDisciplineEvents(behRes.json.data);
+        behaviorEvents.push(...normalizeWebtopBehave(student, rawEvents));
       }
 
       // Timetable (note: disabled for some elementary Webtop schools -> graceful fallback)

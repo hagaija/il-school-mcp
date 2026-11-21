@@ -59018,6 +59018,35 @@ function normalizeWebtopHomework(student, rawTasks, now = /* @__PURE__ */ new Da
   }
   return items;
 }
+function extractWebtopDisciplineEvents(rawData) {
+  if (Array.isArray(rawData)) {
+    return rawData;
+  }
+  if (!rawData || typeof rawData !== "object") {
+    return [];
+  }
+  const obj = rawData;
+  const dt = obj.dataTable;
+  if (Array.isArray(dt)) {
+    return dt;
+  }
+  if (dt && typeof dt === "object") {
+    const dtObj = dt;
+    if (Array.isArray(dtObj.diciplineEvents)) {
+      return dtObj.diciplineEvents;
+    }
+    if (Array.isArray(dtObj.disciplineEvents)) {
+      return dtObj.disciplineEvents;
+    }
+  }
+  if (Array.isArray(obj.diciplineEvents)) {
+    return obj.diciplineEvents;
+  }
+  if (Array.isArray(obj.disciplineEvents)) {
+    return obj.disciplineEvents;
+  }
+  return [];
+}
 function normalizeWebtopBehave(student, rawEvents) {
   const events = [];
   for (let idx = 0; idx < (rawEvents ?? []).length; idx += 1) {
@@ -59304,10 +59333,9 @@ var WebtopClient = class {
         now
       );
       session = behRes.session;
-      if (behRes.json && behRes.json.status !== false && Array.isArray(behRes.json.data)) {
-        behaviorEvents.push(
-          ...normalizeWebtopBehave(student, behRes.json.data)
-        );
+      if (behRes.json && behRes.json.status !== false) {
+        const rawEvents = extractWebtopDisciplineEvents(behRes.json.data);
+        behaviorEvents.push(...normalizeWebtopBehave(student, rawEvents));
       }
       if (cid && classCode) {
         try {
