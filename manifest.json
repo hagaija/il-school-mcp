@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "il-school-mcp",
   "display_name": "Israeli School (Mashov & Webtop)",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Local read-only assistant for Israeli school portals (Mashov & Webtop)",
   "author": {
     "name": "Hagai Jacobson",

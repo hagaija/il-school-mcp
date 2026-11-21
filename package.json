@@ -1,6 +1,6 @@
 {
   "name": "il-school-mcp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Local-first MCP server and desktop plugin for Israeli school portals (Mashov & Webtop)",
   "license": "MIT",
   "repository": {
